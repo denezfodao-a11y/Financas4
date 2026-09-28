@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head><style>
+@font-face {
+  font-family: "Optimistic";
+  font-style: normal;
+  font-weight: 400 600;
+  font-display: swap;
+  src: url("/fonts/OptimisticAI_VF_Optimized.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Optimistic Mono";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/OptimisticMono_W_TextRegular.woff2") format("woff2");
+}
+:where(html) {
+  font-family: "Optimistic", system-ui, sans-serif;
+}
+:where(code, pre, kbd, samp) {
+  font-family: "Optimistic Mono", ui-monospace, monospace;
+}
+</style>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>finza • controle financeiro</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@700;800&display=swap" rel="stylesheet">
+<style>
+  body{font-family:Inter,system-ui; background:#FCFCFD}
+  .jakarta{font-family:"Plus Jakarta Sans",Inter,sans-serif}
+  /* scrollbar bonita */
+  ::-webkit-scrollbar{width:8px;height:8px}
+  ::-webkit-scrollbar-thumb{background:#E2E8F0;border-radius:10px}
+</style>
+</head>
+<body class="text-slate-800 antialiased selection:bg-violet-200">
+<!-- TOPO -->
+<header class="sticky top-0 z-20 backdrop-blur-xl bg-white/80 border-b border-slate-100">
+  <div class="max-w-[1120px] mx-auto px-5 md:px-8 h-[64px] flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-violet-600 to-fuchsia-500 grid place-items-center text-white font-extrabold">F</div>
+      <span class="jakarta font-extrabold text-[18px]">finza</span>
+      <span class="hidden md:inline-flex ml-3 px-2.5 py-1 rounded-full bg-slate-900 text-white text-[11px] font-semibold">CICLO ATIVO</span>
+    </div>
+    <div class="flex items-center gap-2">
+      <div id="labelCicloTop" class="hidden md:flex items-center gap-2 text-[12px] text-slate-500 bg-slate-50 border border-slate-100 px-3 py-1.5 rounded-full">--</div>
+      <div class="w-8 h-8 rounded-full bg-gradient-to-br from-amber-300 to-pink-400"></div>
+    </div>
+  </div>
+</header>
+
+<main class="max-w-[1120px] mx-auto px-5 md:px-8 py-6 md:py-8 pb-[110px]">
+  <!-- LINHA 1: SALDO + CICLO -->
+  <div class="grid grid-cols-1 lg:grid-cols-[1.2fr_0.8fr] gap-5">
+    <!-- CARD SALDO -->
+    <div class="relative overflow-hidden rounded-[28px] bg-gradient-to-br from-[#111827] via-[#1F2937] to-[#0B1220] text-white p-6 md:p-7 shadow-[0_20px_60px_-20px_rgba(0,0,0,0.5)]">
+      <div class="absolute -top-24 -right-24 w-[320px] h-[320px] rounded-full bg-gradient-to-br from-violet-500/30 to-fuchsia-400/30 blur-[30px]"></div>
+      <div class="absolute -bottom-20 -left-20 w-[260px] h-[260px] rounded-full bg-gradient-to-br from-amber-300/20 to-pink-400/20 blur-[24px]"></div>
+      <div class="relative">
+        <div class="flex items-start justify-between">
+          <div class="flex items-center gap-2 text-white/70 text-[12px] font-medium uppercase tracking-wide">💼 Saldo disponível • salvo no navegador</div>
+          <button id="btnEditSaldo" class="w-8 h-8 grid place-items-center rounded-full bg-white/10 hover:bg-white/15 transition">✎</button>
+        </div>
+        <!-- visor saldo -->
+        <div id="visorSaldo" class="mt-3 flex items-baseline gap-2">
+          <span class="text-[14px] text-white/60 font-medium">R$</span>
+          <span id="txtSaldo" class="jakarta text-[40px] md:text-[48px] font-extrabold tracking-tight leading-none">0,00</span>
+        </div>
+        <!-- editor saldo -->
+        <div id="editorSaldo" class="hidden mt-4 flex items-center gap-3">
+          <span class="text-[28px] font-bold">R$</span>
+          <input id="inputSaldo" class="flex-1 bg-white/10 border border-white/15 rounded-xl px-4 py-3 text-[28px] font-bold outline-none focus:bg-white/15" placeholder="0,00"/>
+          <button id="btnSalvarSaldo" class="px-4 py-3 rounded-xl bg-white text-slate-900 font-semibold text-sm">Salvar</button>
+        </div>
+
+        <div class="mt-6 grid grid-cols-3 gap-3">
+          <div class="rounded-2xl bg-white/[0.07] border border-white/10 p-3.5"><div class="text-[11px] text-white/60 uppercase font-semibold">Gastos ciclo</div><div id="txtGastos" class="mt-1 font-semibold">R$ 0,00</div></div>
+          <div class="rounded-2xl bg-white/[0.07] border border-white/10 p-3.5"><div class="text-[11px] text-white/60 uppercase font-semibold">Entradas</div><div id="txtEntradas" class="mt-1 font-semibold">R$ 0,00</div></div>
+          <div class="rounded-2xl bg-white text-slate-900 p-3.5"><div class="text-[11px] text-slate-500 uppercase font-semibold">Saldo após</div><div id="txtSaldoFinal" class="mt-1 font-extrabold">R$ 0,00</div></div>
+        </div>
+        <div class="mt-5">
+          <div class="flex items-center justify-between text-[11px] mb-2"><span id="txtPct" class="text-white/60">0% usado</span><span id="txtRestante" class="text-white/80 font-semibold">R$ 0,00 restante</span></div>
+          <div class="h-2.5 rounded-full bg-white/10 overflow-hidden"><div id="barPct" class="h-full rounded-full bg-gradient-to-r from-violet-400 via-fuchsia-400 to-amber-300 transition-all duration-700" style="width:0%"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CARD CICLO -->
+    <div class="rounded-[28px] bg-white border border-slate-100 shadow-[0_10px_40px_-20px_rgba(0,0,0,0.15)] p-6 md:p-7">
+      <div class="flex items-center justify-between"><h3 class="font-semibold">Ciclo mensal</h3><span class="text-[11px] px-2.5 py-1 rounded-full bg-violet-50 text-violet-700 font-semibold border border-violet-100">EDITÁVEL</span></div>
+      <div class="mt-4 rounded-2xl bg-[#F8FAFC] border border-slate-100 p-4 flex items-center justify-between">
+        <div><div class="text-[11px] uppercase text-slate-500 font-semibold">Início</div><div class="flex items-center gap-2 mt-1"><span class="text-[12px] text-slate-500">Dia</span><select id="selectDia" class="bg-white border border-slate-200 rounded-xl px-3 py-1.5 text-[14px] font-semibold outline-none"></select></div></div>
+        <div class="w-px h-10 bg-slate-200"></div>
+        <div class="text-right"><div class="text-[11px] uppercase text-slate-500 font-semibold">Fim</div><div id="txtFim" class="mt-1 text-[14px] font-semibold">Dia 0</div><div class="text-[11px] text-slate-500">mês seguinte</div></div>
+      </div>
+      <div class="mt-4 flex items-center gap-2 text-[13px] bg-gradient-to-r from-violet-600 to-fuchsia-500 text-white px-4 py-3 rounded-2xl"><span>📅</span><span class="font-semibold">Ciclo atual:</span><span id="labelCiclo" class="ml-1 opacity-90">--</span></div>
+      <div class="mt-5 grid grid-cols-2 gap-3">
+        <div class="rounded-2xl bg-[#FFFBEB] border border-amber-100 p-3.5"><div class="text-[11px] text-amber-700/70 font-semibold uppercase">Dias restantes</div><div id="txtDiasRest" class="mt-1 text-[20px] font-extrabold text-amber-900">0 dias</div></div>
+        <div class="rounded-2xl bg-[#F0FDF4] border border-emerald-100 p-3.5"><div class="text-[11px] text-emerald-700/70 font-semibold uppercase">Lançamentos</div><div id="txtQtd" class="mt-1 text-[20px] font-extrabold text-emerald-900">0</div></div>
+      </div>
+      <p class="mt-4 text-[11px] text-slate-400 leading-relaxed">Persistência com <b>localStorage</b> — saldo, ciclo e lançamentos ficam salvos. Tailwind via CDN, &lt;canvas&gt; e divs, código comentado PT-BR.</p>
+    </div>
+  </div>
+
+  <!-- GRÁFICOS -->
+  <div class="mt-6 grid grid-cols-1 lg:grid-cols-[0.95fr_1.05fr] gap-5">
+    <!-- DONUT CANVAS -->
+    <div class="rounded-[24px] bg-white border border-slate-100 p-6 shadow-[0_10px_40px_-20px_rgba(0,0,0,0.12)]">
+      <div class="flex items-center justify-between"><h3 class="font-semibold">Onde está indo?</h3><span class="text-[11px] text-slate-500 bg-slate-50 border border-slate-100 px-2.5 py-1 rounded-full">canvas puro • por categoria</span></div>
+      <div class="mt-6 flex items-center gap-6">
+        <div class="relative w-[148px] h-[148px] shrink-0">
+          <canvas id="donutCanvas" width="148" height="148" class="w-[148px] h-[148px] rounded-full shadow-inner block"></canvas>
+          <div class="absolute inset-[18px] rounded-full bg-white grid place-items-center shadow-[0_2px_10px_rgba(0,0,0,0.06)] pointer-events-none">
+            <div class="text-center"><div class="text-[11px] uppercase text-slate-500 font-semibold">Total</div><div id="donutTotal" class="font-extrabold text-[14px] leading-tight">R$ 0,00</div></div>
+          </div>
+        </div>
+        <div id="donutLegenda" class="flex-1 space-y-2.5"></div>
+      </div>
+      <div id="donutBar" class="mt-6 h-2 rounded-full bg-slate-100 overflow-hidden flex gap-px"></div>
+    </div>
+
+    <!-- BARRAS DIVS PURAS -->
+    <div class="rounded-[24px] bg-white border border-slate-100 p-6 shadow-[0_10px_40px_-20px_rgba(0,0,0,0.12)] overflow-hidden">
+      <div class="flex items-center justify-between"><h3 class="font-semibold">Gastos por dia do ciclo</h3><span id="barDiasCount" class="text-[11px] text-slate-500 bg-slate-50 border border-slate-100 px-2.5 py-1 rounded-full">0 dias • divs puras</span></div>
+      <div id="barContainer" class="mt-6 h-[176px] flex items-end gap-[3px] md:gap-[6px] w-full"></div>
+      <div class="mt-4 flex items-center justify-between text-[12px] text-slate-500"><span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-gradient-to-r from-violet-600 to-fuchsia-400 inline-block"></span> Saída</span><span id="barMax">Máx: R$ 0,00</span></div>
+    </div>
+  </div>
+
+  <!-- LISTA + FILTROS -->
+  <div class="mt-6 rounded-[24px] bg-white border border-slate-100 shadow-[0_10px_40px_-20px_rgba(0,0,0,0.12)] overflow-hidden">
+    <div class="p-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div><h3 class="font-semibold flex items-center gap-2">Lançamentos do ciclo <span id="qtdFiltro" class="ml-1 text-[11px] px-2 py-1 rounded-full bg-slate-900 text-white">0</span></h3><p class="text-[12px] text-slate-500 mt-1">Filtro por categoria • data e hora em cada item</p></div>
+      <div id="filtros" class="flex flex-wrap items-center gap-2 w-full"></div>
+    </div>
+    <div id="lista" class="border-t border-slate-100 divide-y divide-slate-50"></div>
+  </div>
+
+  <div class="mt-6 rounded-[20px] bg-gradient-to-r from-violet-50 via-fuchsia-50 to-amber-50 border border-violet-100 p-4 flex items-start gap-3">
+    <div class="w-9 h-9 rounded-xl bg-white border border-violet-100 grid place-items-center text-violet-600 shrink-0">✦</div>
+    <div class="flex-1"><p class="text-[12px] text-slate-600 leading-relaxed"><span class="font-semibold text-slate-900">HTML puro single file:</span> Tailwind CDN, &lt;style&gt; e &lt;script&gt; vanilla, sem build. Gráficos em &lt;canvas&gt; e divs, localStorage, FAB + modal, responsivo mobile-first. Copie e cole direto como index.html.</p></div>
+  </div>
+</main>
+
+<!-- FAB -->
+<button id="fab" class="fixed bottom-6 right-6 z-30 w-[62px] h-[62px] rounded-[20px] bg-gradient-to-br from-violet-600 to-fuchsia-500 text-white shadow-[0_14px_30px_-10px_rgba(124,58,237,0.7)] grid place-items-center text-[28px] font-bold hover:scale-[1.02] active:scale-[0.98] transition">+</button>
+
+<!-- MODAL -->
+<div id="modal" class="fixed inset-0 z-[50] hidden">
+  <div id="modalBg" class="absolute inset-0 bg-slate-900/40 backdrop-blur-[2px]"></div>
+  <div class="relative w-full md:max-w-[520px] bg-white rounded-t-[28px] md:rounded-[28px] shadow-[0_20px_80px_-20px_rgba(0,0,0,0.4)] max-h-[92vh] overflow-auto mx-auto mt-auto md:mt-[5vh]">
+    <div class="sticky top-0 bg-white/90 backdrop-blur-xl border-b border-slate-100 px-6 py-4 flex items-center justify-between rounded-t-[28px]"><h3 class="font-semibold">Novo lançamento</h3><button id="btnCloseModal" class="w-8 h-8 rounded-full bg-slate-50 border border-slate-100 grid place-items-center">✕</button></div>
+    <div class="p-6 space-y-5">
+      <div class="grid grid-cols-2 gap-2 p-1 rounded-2xl bg-slate-50 border border-slate-100">
+        <button data-tipo="saida" id="tipoSaida" class="tipoBtn py-2.5 rounded-xl text-[13px] font-semibold bg-slate-900 text-white shadow">↓ Saída</button>
+        <button data-tipo="entrada" id="tipoEntrada" class="tipoBtn py-2.5 rounded-xl text-[13px] font-semibold text-slate-600">↑ Entrada</button>
+      </div>
+      <div><label class="text-[11px] font-semibold uppercase text-slate-500">Valor</label><div class="mt-2 relative"><span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-semibold text-[14px]">R$</span><input id="valorInput" class="w-full pl-12 pr-4 py-3.5 rounded-2xl bg-[#F8FAFC] border border-slate-200 focus:bg-white focus:border-violet-300 outline-none text-[18px] font-bold" placeholder="0,00" inputmode="decimal"/></div></div>
+      <div><label class="text-[11px] font-semibold uppercase text-slate-500">Descrição</label><input id="descInput" class="mt-2 w-full px-4 py-3 rounded-2xl bg-[#F8FAFC] border border-slate-200 focus:bg-white focus:border-violet-300 outline-none text-[14px]" placeholder="Ex: Almoço, Uber, Salário..."/></div>
+      <div><label class="text-[11px] font-semibold uppercase text-slate-500">Categoria</label><div id="catGrid" class="mt-2 grid grid-cols-3 gap-2"></div></div>
+      <div><label class="text-[11px] font-semibold uppercase text-slate-500 flex items-center gap-1">📅 Data e horário</label><input id="dataInput" type="datetime-local" class="mt-2 w-full px-4 py-3 rounded-2xl bg-[#F8FAFC] border border-slate-200 focus:bg-white focus:border-violet-300 outline-none text-[14px]"/><p class="mt-1.5 text-[11px] text-slate-400">Usado para filtrar dentro do ciclo mensal configurável.</p></div>
+      <div class="rounded-2xl bg-gradient-to-br from-violet-50 to-fuchsia-50 border border-violet-100 p-4">
+        <div class="flex items-center justify-between"><label class="text-[12px] font-semibold flex items-center gap-1.5">📷 Comprovante / Nota</label><button id="btnRemoveFoto" class="hidden text-[11px] text-slate-500 underline">Remover</button></div>
+        <div class="mt-3">
+          <label id="fotoDrop" class="flex flex-col items-center justify-center gap-2 w-full h-[110px] rounded-2xl bg-white border-2 border-dashed border-violet-200 cursor-pointer hover:bg-violet-50/50 transition">
+            <div class="w-9 h-9 rounded-xl bg-violet-600 text-white grid place-items-center">📷</div><span class="text-[12px] font-medium text-slate-600">Tirar foto ou escolher da galeria</span><span class="text-[10px] text-slate-400">Preview local, sem envio</span><input id="fotoInput" type="file" accept="image/*" capture="environment" class="hidden"/>
+          </label>
+          <div id="fotoPreviewWrap" class="hidden relative"><img id="fotoPreview" class="w-full h-[160px] object-cover rounded-2xl border border-violet-100"/><div class="absolute bottom-2 right-2 flex gap-2"><button id="btnOCR" class="px-3 py-2 rounded-full bg-slate-900 text-white text-[11px] font-semibold shadow">✦ Extrair valor da foto</button></div></div>
+          <button id="btnOCR2" class="hidden mt-3 w-full py-3 rounded-2xl bg-slate-900 text-white text-[13px] font-semibold">✦ Extrair valor da foto (OCR simulado)</button>
+          <div id="ocrLoading" class="hidden mt-3 text-[12px] text-violet-600 flex items-center gap-2"><span class="w-3 h-3 rounded-full border-2 border-violet-300 border-t-violet-600 animate-spin inline-block"></span>Lendo valores na imagem...</div>
+        </div>
+      </div>
+      <button id="btnSalvar" class="w-full py-4 rounded-2xl bg-gradient-to-r from-violet-600 to-fuchsia-500 text-white font-bold text-[14px] shadow-[0_10px_24px_-10px_rgba(124,58,237,0.7)]">Salvar lançamento</button>
+      <p class="text-center text-[11px] text-slate-400">Salvo no localStorage • 100% offline • Código comentado PT-BR</p>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast" class="fixed bottom-[100px] left-1/2 -translate-x-1/2 z-[60] px-4 py-2.5 rounded-full bg-slate-900 text-white text-[12px] font-semibold shadow-xl hidden"></div>
+
+<script>
+// --- Código vanilla JS comentado em PT-BR ---
+// Config de categorias
+const CATEGORIAS = {
+  "Alimentação":{cor:"#FF6B6B"}, "Transporte":{cor:"#4ECDC4"}, "Casa":{cor:"#A78BFA"},
+  "Lazer":{cor:"#FBBF24"}, "Saúde":{cor:"#34D399"}, "Compras":{cor:"#F472B6"}, "Outros":{cor:"#94A3B8"}
+};
+const LISTA_CATS = Object.keys(CATEGORIAS);
+const LS = {saldo:"finza_saldo_v2", dia:"finza_diaCiclo_v2", trans:"finza_transacoes_v2"};
+
+// Helpers data
+function isoMinus(dias, hora=12){ const d=new Date(); d.setDate(d.getDate()-dias); d.setHours(hora, Math.floor(Math.random()*60),0,0); return d.toISOString().slice(0,16); }
+function agoraISO(){ const d=new Date(); d.setMinutes(d.getMinutes()-d.getTimezoneOffset()); return d.toISOString().slice(0,16); }
+function fmtBRL(v){ return v.toLocaleString("pt-BR",{minimumFractionDigits:2}); }
+
+// Estado
+let diaCiclo = 5;
+let saldo = 3840;
+let transacoes = [
+  {id:"1", valor:42.90, descricao:"Almoço japonês", categoria:"Alimentação", dataHora:isoMinus(1,13), tipo:"saida"},
+  {id:"2", valor:89, descricao:"Uber ida/volta", categoria:"Transporte", dataHora:isoMinus(2,18), tipo:"saida"},
+  {id:"3", valor:2500, descricao:"Salário", categoria:"Outros", dataHora:isoMinus(5,9), tipo:"entrada"},
+  {id:"4", valor:320.50, descricao:"Mercado da semana", categoria:"Casa", dataHora:isoMinus(3,10), tipo:"saida"},
+  {id:"5", valor:129.90, descricao:"Cinema + pipoca", categoria:"Lazer", dataHora:isoMinus(0,20), tipo:"saida"},
+  {id:"6", valor:67.20, descricao:"Farmácia", categoria:"Saúde", dataHora:isoMinus(4,15), tipo:"saida"},
+  {id:"7", valor:199.90, descricao:"Tênis novo", categoria:"Compras", dataHora:isoMinus(6,16), tipo:"saida"},
+];
+let filtro = "Todas";
+let form = {valor:"", descricao:"", categoria:"Alimentação", dataHora:agoraISO(), tipo:"saida", foto:null};
+
+// Carrega localStorage
+try{
+  const s=localStorage.getItem(LS.saldo); if(s) saldo=parseFloat(s);
+  const d=localStorage.getItem(LS.dia); if(d) diaCiclo=parseInt(d);
+  const t=localStorage.getItem(LS.trans); if(t){ const p=JSON.parse(t); if(Array.isArray(p)&&p.length) transacoes=p; }
+}catch(e){ console.warn(e); }
+
+function salvarLS(){
+  localStorage.setItem(LS.saldo, saldo.toString());
+  localStorage.setItem(LS.dia, diaCiclo.toString());
+  localStorage.setItem(LS.trans, JSON.stringify(transacoes));
+}
+
+// Calcula ciclo atual
+function calcCiclo(){
+  const hoje=new Date(); hoje.setHours(0,0,0,0);
+  let inicio;
+  if(hoje.getDate()>=diaCiclo) inicio=new Date(hoje.getFullYear(), hoje.getMonth(), diaCiclo);
+  else inicio=new Date(hoje.getFullYear(), hoje.getMonth()-1, diaCiclo);
+  inicio.setHours(0,0,0,0);
+  const fim=new Date(inicio); fim.setMonth(fim.getMonth()+1); fim.setDate(fim.getDate()-1); fim.setHours(23,59,59,999);
+  const fmt=d=>d.toLocaleDateString("pt-BR",{day:"2-digit", month:"short"});
+  return {inicio, fim, label:`${fmt(inicio)} → ${fmt(fim)}`};
+}
+
+// Render geral
+function render(){
+  const {inicio, fim, label}=calcCiclo();
+  // textos ciclo
+  document.getElementById("labelCiclo").textContent=label;
+  document.getElementById("labelCicloTop").textContent=label;
+  document.getElementById("txtFim").textContent="Dia "+((diaCiclo-1+28)%28 || 28);
+  // dias restantes
+  const diasRest=Math.max(0, Math.ceil((fim.getTime()-new Date().getTime())/86400000));
+  document.getElementById("txtDiasRest").textContent=diasRest+" dias";
+  // saldo
+  document.getElementById("txtSaldo").textContent=fmtBRL(saldo);
+  // filtra ciclo
+  const noCiclo=transacoes.filter(t=>{ const d=new Date(t.dataHora); return d>=inicio && d<=fim; });
+  const saidas=noCiclo.filter(t=>t.tipo==="saida").reduce((s,t)=>s+t.valor,0);
+  const entradas=noCiclo.filter(t=>t.tipo==="entrada").reduce((s,t)=>s+t.valor,0);
+  document.getElementById("txtGastos").textContent="R$ "+fmtBRL(saidas);
+  document.getElementById("txtEntradas").text
